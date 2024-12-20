@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Search</title>
+  <style>
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      padding: 20px;
+    }
+    .search-container {
+      margin-bottom: 20px;
+    }
+    .identity-card {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .identity-card img {
+      border: 70%;
+      width: 70px;
+      height: 55px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Random User Search</h1>
+  <div class="search-container">
+    <input id="searchInput" type="text" placeholder="Search users..." />
+    <button id="searchButton">Search</button>
+  </div>
+  <div id="results"></div>
+
+  <script>
+    const API_URL = 'https://randomuser.me/api/?results=10';
+
+
+    async function fetchUsers() {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      const users = data.results;
+      
+      
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      return users;
+    }
+
+    
+    function displayUsers(users) {
+      const resultsContainer = document.getElementById('results');
+      resultsContainer.innerHTML = ''; 
+      users.forEach(user => {
+        const card = document.createElement('div');
+        card.classList.add('identity-card');
+        card.innerHTML = `
+          <img src="${user.picture.medium}" alt="${user.name.first}">
+          <div>
+            <h3>${user.name.first} ${user.name.last}</h3>
+            <p>Email: ${user.email}</p>
+            <p>Phone: ${user.phone}</p>
+            <p>City: ${user.location.city}</p> <!-- Corrected the syntax -->
+          </div>
+        `;
+        resultsContainer.appendChild(card);
+      });
+    }
+
+    function searchUsers(query) {
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const filteredUsers = users.filter(user =>
+        `${user.name.first} ${user.name.last}`.toLowerCase().includes(query.toLowerCase())
+      );
+      displayUsers(filteredUsers);
+    }
+
+
+    document.getElementById('searchButton').addEventListener('click', () => {
+      const query = document.getElementById('searchInput').value;
+      searchUsers(query);
+    });
+
+ 
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const query = document.getElementById('searchInput').value;
+        searchUsers(query);
+      }
+    });
+
+ 
+    fetchUsers();
+    
+  </script>
+</body>
+</html>
